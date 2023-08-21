@@ -1,0 +1,9 @@
+{
+	"protoc": {
+		"options": [
+			"-I", "protos/src",
+			"-I", "protos/generated",
+			"-I", "node_modules/protobuf-ts/include"
+		]
+	}
+}

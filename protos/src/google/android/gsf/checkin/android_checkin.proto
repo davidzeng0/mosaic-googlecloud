@@ -1,0 +1,25 @@
+syntax = "proto2";
+
+package google.android.gsf.checkin;
+
+import "google/api/annotations.proto";
+import "google/api/client.proto";
+import "google/android/gsf/checkin/android_checkin_request.proto";
+import "google/android/gsf/checkin/android_checkin_response.proto";
+
+option cc_enable_arenas = true;
+option java_multiple_files = true;
+option java_package = "com.google.android.gsf.checkin";
+option objc_class_prefix = "GSF";
+
+service AndroidCheckin{
+	option (google.api.default_host) = "android.googleapis.com";
+	option (google.api.oauth_scopes) = "https://www.googleapis.com/auth/android_checkin";
+
+	rpc Checkin(AndroidCheckinRequest) returns (AndroidCheckinResponse){
+		option (google.api.http) = {
+			post: "/checkin"
+			body: "*"
+		};
+	}
+}

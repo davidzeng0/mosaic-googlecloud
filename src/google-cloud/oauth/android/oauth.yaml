@@ -1,0 +1,4 @@
+# OAuth 2.0 Issuers
+- name: Android OAuth 2.0
+  id: android.googleapis.com
+  implementation: ./issuer.AndroidOAuth

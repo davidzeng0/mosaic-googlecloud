@@ -1,0 +1,3 @@
+- name: Google Auth Transport
+  id: googleauth
+  implementation: ./googleauth.GoogleAuthTransport

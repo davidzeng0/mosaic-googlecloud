@@ -1,0 +1,41 @@
+- name: Google REST
+  id: google.rest
+  options: # https://github.com/googleapis/googleapis/blob/master/google/cloud/compute/v1/compute.v1.json#L39
+    apiFormatVersion: # error format version
+      header: X-Goog-Api-Format-Version
+      default: 1
+      enum:
+        - 1
+        - 2
+    apiKey:
+      header: X-Goog-Api-Key
+    fieldMask:
+      header: X-Goog-FieldMask
+    xgafv: # X-Goog-Api-Format-Version
+      query: $.xgavf
+      default: 1
+      enum:
+        - 1
+        - 2
+    alt: # preferred response type
+      query: alt
+      enum:
+        - json
+        - media
+        - proto
+    key: # api key
+      query: key
+    prettyPrint: # pretty print json
+      query: prettyPrint
+      default: true
+      enum:
+        - true
+        - false
+    retryExpiredCredentials:
+      default: false
+      enum:
+        - true
+        - false
+  xssi:
+    json: )]}' # For services like (but not limited to) authentication that are accessible from cross-sites, there is usually this xssi prefix
+  implementation: ./client.GoogleClient

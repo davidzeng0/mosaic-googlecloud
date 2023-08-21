@@ -1,0 +1,32 @@
+{
+	"name": "mosaic-googlecloud",
+	"version": "0.0.1",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"dependencies": {
+		"mosaic": "https://github.com/davidzeng0/mosaic.git#dist",
+		"protobuf-toolkit": "https://github.com/davidzeng0/protobuf-toolkit.git#dist",
+		"protobuf-ts": "https://github.com/davidzeng0/protobuf-ts.git#dist"
+	},
+	"devDependencies": {
+		"@types/node": "^18.14.0",
+		"cmake-js": "^7.2.1",
+		"git-publish": "^2.0.0",
+		"ts-proto": "^1.156.2",
+		"tsup": "^7.2.0",
+		"typescript": "^5.1.6"
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"configure": "cmake-js configure",
+		"build": "cmake-js build",
+		"clean": "cmake-js clean && rm -rf dist",
+		"cleanall": "yarn clean && rm -rf node_modules yarn.lock package-lock.json protos/generated/*",
+		"full": "yarn proto && yarn build",
+		"proto": "node protos/index/gen",
+		"prepare": "yarn clean && yarn full",
+		"git-publish": "git-publish -b dist"
+	}
+}

@@ -1,0 +1,3 @@
+- name: Google Auth
+  id: google.android.auth
+  implementation: ./client.GoogleAuthClient
