@@ -1,0 +1,6 @@
+'use strict';
+
+var electron = require('electron');
+var jsCommon = require('js-common');
+
+var d=Object.defineProperty;var t=(e,n)=>d(e,"name",{value:n,configurable:!0});function l(e){console.error(e),process.exit(-1);}t(l,"exit");process.on("uncaughtException",l);process.on("unhandledRejection",l);var a={};function h(e){return new Promise((n,s)=>{let o=t((g,c)=>{c.domain!="accounts.google.com"||c.name!="oauth_token"||(e.cookies.off("changed",o),n(c.value));},"changed");e.cookies.on("changed",o);})}t(h,"loginComplete");async function i(){let e=new electron.BrowserWindow({width:450,height:580}),n=e.webContents.session,s;a.userAgent&&e.webContents.setUserAgent(a.userAgent);try{let o=new jsCommon.URLBuilder("https://accounts.google.com/embedded/setup/v2/android");o.setParams(a.form),e.setMenu(null),await e.loadURL(o.href),s=await h(n),process.send?process.send({event:"output",data:s}):console.log(s);}catch(o){console.error(o);}n.clearStorageData(),e.close();}t(i,"auth");electron.app.on("window-all-closed",()=>{electron.app.quit();});process.send?(process.send({event:"ready"}),process.on("message",e=>{switch(e.event){case"start":electron.app.whenReady().then(i);break;case"options":a=e.data;break}})):electron.app.whenReady().then(i);
