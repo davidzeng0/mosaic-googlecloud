@@ -1,5 +1,5 @@
 # mosaic-googlecloud
-A collection of API and OAuth 2.0 clients
+Google Cloud OAuth + APIs
 
 ```bash
 npm i github:davidzeng0/mosaic-googlecloud#dist
