@@ -1,10 +1,20 @@
-import { InvalidArgumentError, GenericError, UnsupportedError, Json } from 'js-common';
+import { InvalidArgumentError, GenericError, UnsupportedError, Json, ConcurrentPromise } from 'js-common';
 import { MobileServices } from '@/index';
 import { OAuthIssuer, Config, CredentialStore, RefreshToken, OAuthClient, AccessToken, Scopes, OAuthOptions, launch, UserDeniedError, DefaultOAuthProvider } from 'mosaic';
 import { ROOT } from '@/path';
 
 export class AndroidOAuth extends OAuthIssuer{
-	private androidIdPromise?: Promise<string>;
+	private androidId = new ConcurrentPromise(() => this.createAndroidId());
+
+	private async createAndroidId(){
+		let device = Config.get('oauth/android.googleapis.com/deviceInfo');
+
+		if(!device)
+			throw new GenericError('Device configuration not found');
+		let response = await MobileServices.createAndroidId(device);
+
+		return response.androidId;
+	}
 
 	private async getAndroidId(){
 		let androidIdKey = 'mosaic.google-cloud.androidId';
@@ -12,19 +22,7 @@ export class AndroidOAuth extends OAuthIssuer{
 
 		if(androidId)
 			return androidId;
-		if(this.androidIdPromise)
-			return await this.androidIdPromise;
-		let device = Config.get('oauth/android.googleapis.com/deviceInfo');
-
-		if(!device)
-			throw new GenericError('Device configuration not found');
-		this.androidIdPromise = MobileServices.createAndroidId(device).then(response => response.androidId);
-
-		try{
-			androidId = await this.androidIdPromise;
-		}finally{
-			this.androidIdPromise = undefined;
-		}
+		androidId = await this.androidId.run();
 
 		CredentialStore.setKey(androidIdKey, androidId);
 
