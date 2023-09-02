@@ -592,7 +592,8 @@ declare namespace index {
 }
 
 declare class AndroidOAuth extends OAuthIssuer {
-    private androidIdPromise?;
+    private androidId;
+    private createAndroidId;
     private getAndroidId;
     private login;
     private issue;
