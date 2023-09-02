@@ -1,6 +1,6 @@
 import { InvalidArgumentError, GenericError, UnsupportedError, Json, ConcurrentPromise } from 'js-common';
 import { MobileServices } from '@/index';
-import { OAuthIssuer, Config, CredentialStore, RefreshToken, OAuthClient, AccessToken, Scopes, OAuthOptions, launch, UserDeniedError, DefaultOAuthProvider } from 'mosaic';
+import { OAuthIssuer, Config, CredentialStore, RefreshToken, OAuthClient, AccessToken, Scopes, OAuthOptions, UserDeniedError, DefaultOAuthProvider, OAuthTools } from 'mosaic';
 import { ROOT } from '@/path';
 
 export class AndroidOAuth extends OAuthIssuer{
@@ -79,7 +79,7 @@ export class AndroidOAuth extends OAuthIssuer{
 
 		let code, refresh, access;
 
-		code = await launch(`${ROOT}/google-cloud/oauth/android/login`, opts);
+		code = await OAuthTools.launchElectronApplication(`${ROOT}/google-cloud/oauth/android/login`, opts);
 
 		if(!code.length)
 			throw new UserDeniedError();

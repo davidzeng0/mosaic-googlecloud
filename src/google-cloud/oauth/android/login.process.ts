@@ -1,5 +1,6 @@
+import { OAuthElectronIPCMessage } from 'mosaic';
 import { Session, Event, Cookie, BrowserWindow, app } from 'electron';
-import { URLBuilder } from 'js-common';
+import { KV, URLBuilder } from 'js-common';
 
 function exit(e: any){
 	console.error(e);
@@ -10,7 +11,7 @@ function exit(e: any){
 process.on('uncaughtException', exit);
 process.on('unhandledRejection', exit);
 
-let options: any = {};
+let options: KV<any> | undefined;
 
 function loginComplete(session: Session){
 	return new Promise<string>((resolve, _) => {
@@ -32,12 +33,12 @@ async function auth(){
 
 	let code;
 
-	if(options.userAgent)
+	if(options?.userAgent)
 		win.webContents.setUserAgent(options.userAgent);
 	try{
 		let url = new URLBuilder('https://accounts.google.com/embedded/setup/v2/android');
 
-		url.setParams(options.form);
+		url.setParams(options?.form);
 		win.setMenu(null);
 
 		await win.loadURL(url.href);
@@ -46,8 +47,7 @@ async function auth(){
 
 		if(process.send){
 			process.send({
-				event: 'output',
-				data: code
+				output: code
 			});
 		}else{
 			console.log(code);
@@ -66,20 +66,16 @@ app.on('window-all-closed', () => {
 
 if(process.send){
 	process.send({
-		event: 'ready'
+		ready: true
 	});
 
-	process.on('message', (message: any) => {
-		switch(message.event){
-			case 'start':
-				app.whenReady().then(auth);
+	process.on('message', (data: any) => {
+		let message = data as OAuthElectronIPCMessage;
 
-				break;
-			case 'options':
-				options = message.data;
-
-				break;
-		}
+		if(message.start)
+			app.whenReady().then(auth);
+		if(message.options)
+			options = message.options;
 	});
 }else{
 	app.whenReady().then(auth);
