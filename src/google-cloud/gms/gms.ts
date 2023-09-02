@@ -1,4 +1,4 @@
-import { Client } from 'mosaic';
+import { DefaultServiceProvider } from 'mosaic';
 import { ApiError } from 'js-common';
 
 import { AndroidCheckin } from '@protos/google/android/gsf/checkin/android_checkin';
@@ -22,15 +22,15 @@ export interface DeviceConfig{
 	id?: string;
 }
 
-Client.DefaultServiceProvider.registerClients(clients);
-Client.DefaultServiceProvider.registerTransports(transports);
-Client.DefaultServiceProvider.registerServices(services);
+DefaultServiceProvider.registerClients(clients);
+DefaultServiceProvider.registerTransports(transports);
+DefaultServiceProvider.registerServices(services);
 
 let checkinService: AndroidCheckin | undefined;
 
 export function checkin(request: AndroidCheckinRequest){
 	if(!checkinService){
-		checkinService = Client.DefaultServiceProvider.create('android.googleapis.com://checkin', {
+		checkinService = DefaultServiceProvider.create('android.googleapis.com://checkin', {
 			transport: 'application/x-protobuffer'
 		});
 	}

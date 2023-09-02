@@ -1,1 +1,1 @@
-export * as Android from './android';
+export * from './android';

@@ -1,9 +1,9 @@
 import { ParseError, URLParams, Response, HttpHeader, Mime, HttpContentType, ApiError, KV, InvalidArgumentError } from 'js-common';
 import { GoogleAuthError, GoogleAuthErrors } from './errors';
-import { Client } from 'mosaic';
+import { Client, ApiRequest, HttpClients } from 'mosaic';
 
-export class GoogleAuthClient extends Client.Client{
-	override async request(request: Client.ApiRequest, options?: KV<any>): Promise<Response>{
+export class GoogleAuthClient extends Client{
+	override async request(request: ApiRequest, options?: KV<any>): Promise<Response>{
 		if(options?.credentials)
 			throw new InvalidArgumentError('Credentials not supported for this client');
 		request.body = URLParams.toString(request.body as string);
@@ -13,7 +13,7 @@ export class GoogleAuthClient extends Client.Client{
 
 		if(!type || !Mime.typeEquals(type, HttpContentType.TEXT)){
 			if(!res.ok)
-				throw Client.HttpStatus.errorFrom(res);
+				throw HttpClients.makeError(res);
 			throw new ApiError(`Expected content type '${HttpContentType.TEXT}' but got '${type}'`);
 		}
 
@@ -38,7 +38,7 @@ export class GoogleAuthClient extends Client.Client{
 		}
 
 		if(!res.ok)
-			throw Client.HttpStatus.errorFrom(res);
+			throw HttpClients.makeError(res);
 		res.body = parsed as any;
 
 		return res;

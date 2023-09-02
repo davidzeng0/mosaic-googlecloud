@@ -1,19 +1,19 @@
 import { HttpHeader, Response, Mime, ApiError, ParseError, InvalidArgumentError, UnimplementedError, PreconditionFailedError, PermissionDeniedError, NotFoundError, AbortedError, ExistsError, RateLimitedError, InternalServerError, UnavailableError, TimedOutError, HttpContentType, KV, Json } from 'js-common';
-import { OAuth, Client } from 'mosaic';
+import { AccessToken, ApiKey, ApiRequest, Client, Credentials, HttpClients, InvalidCredentialsError } from 'mosaic';
 import { GoogleCookie } from './credentials';
 
 import { Code, codeFromJSON } from 'protobuf-ts/protos/google/rpc/code';
 import { Status } from 'protobuf-ts/protos/google/rpc/status';
 import { Error } from '@protos/google/rest/json_error';
 
-export class GoogleClient extends Client.Client{
-	private async setRequestCredentials(request: Client.ApiRequest, credentials: Client.Credentials[], forceRefresh = false){
+export class GoogleClient extends Client{
+	private async setRequestCredentials(request: ApiRequest, credentials: Credentials[], forceRefresh = false){
 		let refreshed = false;
 
 		for(let credential of credentials){
-			if(credential instanceof Client.ApiKey)
+			if(credential instanceof ApiKey)
 				request.setHeader('X-Goog-Api-Key', credential.key);
-			else if(credential instanceof OAuth.AccessToken){
+			else if(credential instanceof AccessToken){
 				if(credential.expired || forceRefresh){
 					await credential.refresh();
 
@@ -34,7 +34,7 @@ export class GoogleClient extends Client.Client{
 		return refreshed;
 	}
 
-	private async perform(request: Client.ApiRequest){
+	private async perform(request: ApiRequest){
 		let res = await request.execute();
 
 		if(res.ok && this.xssi?.json === undefined)
@@ -85,7 +85,7 @@ export class GoogleClient extends Client.Client{
 			case Code.FAILED_PRECONDITION:
 				throw new PreconditionFailedError(message);
 			case Code.UNAUTHENTICATED:
-				throw new OAuth.InvalidCredentialsError(message);
+				throw new InvalidCredentialsError(message);
 			case Code.PERMISSION_DENIED:
 				throw new PermissionDeniedError(message);
 			case Code.NOT_FOUND:
@@ -106,11 +106,11 @@ export class GoogleClient extends Client.Client{
 			case Code.DEADLINE_EXCEEDED:
 				throw new TimedOutError(message);
 			default:
-				throw Client.HttpStatus.errorFrom(res, message, status);
+				throw HttpClients.makeError(res, message, status);
 		}
 	}
 
-	override async request(request: Client.ApiRequest, options?: KV<any>): Promise<Response>{
+	override async request(request: ApiRequest, options?: KV<any>): Promise<Response>{
 		if(options?.credentials)
 			await this.setRequestCredentials(request, options.credentials);
 		let promise = this.perform(request);
@@ -120,7 +120,7 @@ export class GoogleClient extends Client.Client{
 		try{
 			return await promise;
 		}catch(e){
-			if(!(e instanceof OAuth.InvalidCredentialsError))
+			if(!(e instanceof InvalidCredentialsError))
 				throw e;
 			if(!await this.setRequestCredentials(request, options.credentials, true))
 				throw e;

@@ -1,10 +1,10 @@
-import { Client } from 'mosaic';
+import { DefaultServiceProvider } from 'mosaic';
 
 export * as MobileServices from './gms';
-export * as OAuth from './oauth';
+export * from './oauth';
 export * from './projects';
 export * from './credentials';
 
 import clients from '@config/google-cloud/clients';
 
-Client.DefaultServiceProvider.registerClients(clients);
+DefaultServiceProvider.registerClients(clients);

@@ -1,5 +1,5 @@
 import { GenericError, InternalServerError, InvalidArgumentError, KV, PermissionDeniedError, ServerError, UnavailableError } from 'js-common';
-import { OAuth } from 'mosaic';
+import { InvalidCredentialsError, InvalidScopeError, OAuthError, UnauthorizedClientError, UnrecognizedIDClientError, UserDeniedError } from 'mosaic';
 
 export enum GoogleAuthErrors{
 	CLIENT_LOGIN_DISABLED = 'ClientLoginDisabled',
@@ -63,7 +63,7 @@ export enum GoogleAuthErrors{
     AUTH_BINDING_ERROR = 'AuthBindingError'
 }
 
-export class GoogleAuthError extends OAuth.OAuthError{
+export class GoogleAuthError extends OAuthError{
 	static from(error: string): GenericError{
 		switch(error){
 			case GoogleAuthErrors.BAD_REQUEST:
@@ -71,13 +71,13 @@ export class GoogleAuthError extends OAuth.OAuthError{
 			case GoogleAuthErrors.ILLEGAL_ARGUMENT:
 				return new InvalidArgumentError();
 			case GoogleAuthErrors.BAD_AUTHENTICATION:
-				return new OAuth.InvalidCredentialsError();
+				return new InvalidCredentialsError();
 			case GoogleAuthErrors.RESTRICTED_CLIENT:
-				return new OAuth.UnauthorizedClientError();
+				return new UnauthorizedClientError();
 			case GoogleAuthErrors.UNREGISTERED_ON_API_CONSOLE:
-				return new OAuth.UnrecognizedIDClientError();
+				return new UnrecognizedIDClientError();
 			case GoogleAuthErrors.INVALID_SCOPE:
-				return new OAuth.InvalidScopeError();
+				return new InvalidScopeError();
 			case GoogleAuthErrors.PERMISSION_DENIED:
 				return new PermissionDeniedError();
 			case GoogleAuthErrors.SERVER_ERROR:
@@ -87,7 +87,7 @@ export class GoogleAuthError extends OAuth.OAuthError{
 			case GoogleAuthErrors.SERVICE_UNAVAILABLE:
 				return new UnavailableError();
 			case GoogleAuthErrors.USER_CANCEL:
-				return new OAuth.UserDeniedError();
+				return new UserDeniedError();
 		}
 
 		for(let [key, value] of KV.entries(GoogleAuthErrors)){

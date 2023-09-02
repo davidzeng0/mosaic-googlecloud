@@ -1,1 +1,1 @@
-export const ROOT = __dirname;
+export const ROOT = `${__dirname}/..`;

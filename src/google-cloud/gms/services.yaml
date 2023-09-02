@@ -11,7 +11,8 @@
       transport:
         - application/json
         - application/x-protobuffer
-  implementation: '@protos/google/android/gsf/checkin/android_checkin.AndroidCheckinDefinition' # protobuf service implementation
+  implementation:
+    protoOverREST: '@protos/google/android/gsf/checkin/android_checkin.AndroidCheckinDefinition' # protobuf service implementation
 
 - name: Android Authentication
   id: android.googleapis.com://auth

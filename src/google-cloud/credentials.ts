@@ -1,4 +1,4 @@
-import { Client, OAuth } from 'mosaic';
+import { Credentials, InvalidCredentialsError } from 'mosaic';
 import { Cookie } from 'js-common';
 import { createHash } from 'crypto';
 
@@ -22,7 +22,7 @@ function makeCookie(prefix: CookiePrefix, cookie: GoogleCookies){
 	return `${prefix}${cookie}`;
 }
 
-export class GoogleCookie extends Client.Credentials{
+export class GoogleCookie extends Credentials{
 	private cookies;
 	private string;
 	readonly authuser;
@@ -40,7 +40,7 @@ export class GoogleCookie extends Client.Credentials{
 		if(!apisid)
 			apisid = this.cookies[makeCookie(CookiePrefix.SECURE_THIRD_PARTY, GoogleCookies.APISID)];
 		if(!apisid)
-			throw new OAuth.InvalidCredentialsError();
+			throw new InvalidCredentialsError();
 		let hash = createHash('sha1').update(`${time} ${apisid} ${origin}`).digest('hex');
 
 		return `${https ? GoogleCookies.SAPISID : GoogleCookies.APISID}HASH ${time}_${hash}`;

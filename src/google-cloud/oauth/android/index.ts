@@ -1,7 +1,7 @@
-import { OAuth } from 'mosaic';
+import { DefaultOAuthProvider } from 'mosaic';
 
 export * from './issuer';
 
 import issuers from '@config/google-cloud/oauth/android/oauth';
 
-OAuth.DefaultOAuthProvider.registerIssuers(issuers);
+DefaultOAuthProvider.registerIssuers(issuers);

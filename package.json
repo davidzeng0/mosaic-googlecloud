@@ -1,6 +1,6 @@
 {
 	"name": "mosaic-googlecloud",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"dependencies": {
@@ -10,6 +10,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "^18.14.0",
+		"@types/node-fetch": "^2.6.4",
 		"cmake-js": "^7.2.1",
 		"git-publish": "^2.0.0",
 		"ts-proto": "^1.156.2",

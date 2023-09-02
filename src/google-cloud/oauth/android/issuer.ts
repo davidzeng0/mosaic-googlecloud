@@ -1,15 +1,14 @@
 import { InvalidArgumentError, GenericError, UnsupportedError, Json } from 'js-common';
 import { MobileServices } from '@/index';
-import { Config } from 'protobuf-ts';
-import { OAuth } from 'mosaic';
+import { OAuthIssuer, Config, CredentialStore, RefreshToken, OAuthClient, AccessToken, Scopes, OAuthOptions, launch, UserDeniedError, DefaultOAuthProvider } from 'mosaic';
 import { ROOT } from '@/path';
 
-export class AndroidOAuth extends OAuth.OAuthIssuer{
+export class AndroidOAuth extends OAuthIssuer{
 	private androidIdPromise?: Promise<string>;
 
 	private async getAndroidId(){
 		let androidIdKey = 'mosaic.google-cloud.androidId';
-		let androidId = await OAuth.Store.getKey(androidIdKey);
+		let androidId = await CredentialStore.getKey(androidIdKey);
 
 		if(androidId)
 			return androidId;
@@ -27,12 +26,12 @@ export class AndroidOAuth extends OAuth.OAuthIssuer{
 			this.androidIdPromise = undefined;
 		}
 
-		OAuth.Store.setKey(androidIdKey, androidId);
+		CredentialStore.setKey(androidIdKey, androidId);
 
 		return androidId;
 	}
 
-	private async login(code: string): Promise<OAuth.RefreshToken>{
+	private async login(code: string): Promise<RefreshToken>{
 		let token = await MobileServices.Auth.login(code);
 		let profile = [];
 
@@ -40,7 +39,7 @@ export class AndroidOAuth extends OAuth.OAuthIssuer{
 			profile.push(token.firstName);
 		if(token.lastName)
 			profile.push(token.lastName);
-		return new OAuth.RefreshToken({
+		return new RefreshToken({
 			issuer: this,
 			type: 'Bearer',
 			secret: token.secret,
@@ -52,14 +51,14 @@ export class AndroidOAuth extends OAuth.OAuthIssuer{
 		});
 	}
 
-	private async issue(refresh: OAuth.RefreshToken, client: OAuth.OAuthClient, scopes: OAuth.Scope[]): Promise<OAuth.AccessToken>{
+	private async issue(refresh: RefreshToken, client: OAuthClient, scopes: Scopes): Promise<AccessToken>{
 		let androidId = await this.getAndroidId();
 		let token = await MobileServices.Auth.issueToken(androidId, {
 			name: client.package!,
 			signature: client.fingerprint!
 		}, refresh.secret, scopes);
 
-		return new OAuth.AccessToken({
+		return new AccessToken({
 			issuer: this,
 			client: client.id,
 			type: 'Bearer',
@@ -68,7 +67,7 @@ export class AndroidOAuth extends OAuth.OAuthIssuer{
 		});
 	}
 
-	override async perform(client: OAuth.OAuthClient, scopes: OAuth.Scope[], options?: OAuth.OAuthOptions): Promise<OAuth.AccessToken>{
+	override async perform(client: OAuthClient, scopes: Scopes, options?: OAuthOptions): Promise<AccessToken>{
 		if(options?.noUI)
 			throw new InvalidArgumentError('No UI not supported for this login method');
 		if(options?.email || options?.password)
@@ -82,30 +81,30 @@ export class AndroidOAuth extends OAuth.OAuthIssuer{
 
 		let code, refresh, access;
 
-		code = await OAuth.launch(`${ROOT}/google-cloud/oauth/android/login`, opts);
+		code = await launch(`${ROOT}/google-cloud/oauth/android/login`, opts);
 
 		if(!code.length)
-			throw new OAuth.UserDeniedError();
+			throw new UserDeniedError();
 		refresh = await this.login(code[0]);
 		access = await this.issue(refresh, client, scopes);
 
 		return access;
 	}
 
-	override async exchange(code: string, client: OAuth.OAuthClient): Promise<OAuth.AccessToken>{
+	override async exchange(code: string, client: OAuthClient): Promise<AccessToken>{
 		void code;
 		void client;
 
 		throw new UnsupportedError();
 	}
 
-	override async refresh(access: OAuth.AccessToken, refresh: OAuth.RefreshToken): Promise<OAuth.AccessToken>{
-		let client = OAuth.DefaultOAuthProvider.getClient(access.client);
+	override refresh(access: AccessToken, refresh: RefreshToken): Promise<AccessToken>{
+		let client = DefaultOAuthProvider.getClient(access.client);
 
-		return await this.issue(refresh, client, access.scopes);
+		return this.issue(refresh, client, access.scopes);
 	}
 
-	override async revoke(access: OAuth.AccessToken){
+	override async revoke(access: AccessToken){
 
 	}
 }

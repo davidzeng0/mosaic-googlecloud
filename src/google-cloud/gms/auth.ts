@@ -1,5 +1,6 @@
 import { ApiError, KV} from 'js-common';
-import { Client, OAuth } from 'mosaic';
+import { DefaultServiceProvider, Scopes } from 'mosaic';
+import GMSConfig from '@config/google-cloud/gms/gms';
 
 function getOrThrow(map: Map<string, string>, key: string){
 	if(!map.has(key))
@@ -16,21 +17,19 @@ export interface GoogleAuthService{
 	auth(form: KV<any>): Promise<Map<string, string>>;
 }
 
-export const GOOGLE_PLAY_SERVICES_VERSION = 22_50_14_000; /* com.google.android.gms 22.50.14 */
-
 export class Auth{
 	private constructor(){}
 
 	private static authService: GoogleAuthService | undefined;
 
-	private static async oauth(token: string, form: KV<any>){
+	private static oauth(token: string, form: KV<any>){
 		if(!this.authService)
-			this.authService = Client.DefaultServiceProvider.create('android.googleapis.com://auth') as GoogleAuthService;
-		return await this.authService.auth({
+			this.authService = DefaultServiceProvider.create('android.googleapis.com://auth') as GoogleAuthService;
+		return this.authService.auth({
 			...form,
 
 			service: form.service.join(':'),
-			google_play_services_version: GOOGLE_PLAY_SERVICES_VERSION,
+			google_play_services_version: GMSConfig.version,
 			Token: token
 		});
 	}
@@ -53,12 +52,12 @@ export class Auth{
 		};
 	}
 
-	static async issueToken(androidId: string, app: AndroidApp, refreshToken: string, scopes: OAuth.Scope[]){
+	static async issueToken(androidId: string, app: AndroidApp, refreshToken: string, scopes: Scopes){
 		let res = await this.oauth(refreshToken, {
 			androidId,
 			app: app.name,
 			client_sig: app.signature,
-			service: ['oauth2', OAuth.Scopes.stringify(scopes)]
+			service: ['oauth2', Scopes.stringify(scopes)]
 		});
 
 		let expire: number | undefined = undefined;
@@ -73,7 +72,7 @@ export class Auth{
 		return {
 			secret: getOrThrow(res, 'Auth'),
 			expire,
-			scopes: OAuth.Scopes.parse(getOrThrow(res, 'grantedScopes'))
+			scopes: Scopes.parse(getOrThrow(res, 'grantedScopes'))
 		};
 	}
 }

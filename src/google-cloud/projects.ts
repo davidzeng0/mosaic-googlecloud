@@ -1,7 +1,7 @@
-import { OAuth } from 'mosaic';
+import { OAuthConfig, OAuthProvider, DefaultOAuthProvider } from 'mosaic';
 import { NotFoundError } from 'js-common';
 
-export interface ServiceConfig{
+export interface GoogleCloudServiceConfig{
 	id: string;
 	defaultHost?: string;
 }
@@ -17,12 +17,12 @@ export interface GoogleOAuthClient{
 	redirectUri?: string;
 }
 
-export interface Project{
+export interface GoogleCloudProject{
 	name: string;
 	resourceNumber?: string;
-	oauth?: OAuth.OAuthConfig[];
+	oauth?: OAuthConfig[];
 	keys?: string[];
-	apis?: ServiceConfig[];
+	apis?: GoogleCloudServiceConfig[];
 	clients?: GoogleOAuthClient[];
 }
 
@@ -30,12 +30,12 @@ export class ProjectRegistry{
 	private provider;
 	private projects;
 
-	constructor(provider: OAuth.OAuthProvider = OAuth.DefaultOAuthProvider){
+	constructor(provider: OAuthProvider = DefaultOAuthProvider){
 		this.provider = provider;
-		this.projects = new Map<string, Project>();
+		this.projects = new Map<string, GoogleCloudProject>();
 	}
 
-	registerProjects(projects: Project[]){
+	registerProjects(projects: GoogleCloudProject[]){
 		for(let project of projects){
 			this.projects.set(project.name, project);
 
