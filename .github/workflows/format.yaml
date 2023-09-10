@@ -1,0 +1,36 @@
+name: Build
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - 'master'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        version: [18.x, 20.x]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Setup access to private repositories
+        run: git config --global credential.helper '!f() { echo "username=${{ secrets.GH_TOKEN }}"; echo "password="; }; f'
+
+      - name: Use node.js ${{ matrix.version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.version }}
+
+      - name: Install dependencies
+        run: sudo apt install -y cmake ninja-build protobuf-compiler
+
+      - name: Install packages
+        run: yarn install
+
+      - name: Test
+        run: yarn test
