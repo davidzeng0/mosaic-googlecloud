@@ -13,13 +13,16 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN }}
 
+      - name: Setup access to private repositories
+        run: git config --global credential.helper '!f() { echo "username=${{ secrets.GH_TOKEN }}"; echo "password="; }; f'
+
       - name: Setup node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20.x
 
       - name: Install dependencies
-        run: sudo apt install -y cmake
+        run: sudo apt install -y cmake ninja-build protobuf-compiler
 
       - name: Install packages
         run: yarn install
